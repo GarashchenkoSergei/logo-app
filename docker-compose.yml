@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres
+    container_name: postgres-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: logo-app-backend
+    environment:
+      PORT: 3001
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: logo-app-frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3001 # Point to backend URL
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend

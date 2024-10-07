@@ -3,7 +3,7 @@ version: '3.8'
 services:
   postgres:
     image: postgres
-    container_name: postgres-db
+    container_name: postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: admin
@@ -18,7 +18,13 @@ services:
       dockerfile: Dockerfile
     container_name: logo-app-backend
     environment:
-      PORT: 3001
+      PORT: ${PORT}
+      POSTGRES_DATABASE: ${POSTGRES_DATABASE}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      WEB3_NODE: ${WEB3_NODE}
     ports:
       - "3001:3001"
     depends_on:
@@ -30,7 +36,7 @@ services:
       dockerfile: Dockerfile
     container_name: logo-app-frontend
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:3001 # Point to backend URL
+      NEXT_PUBLIC_API_URL: http://localhost:3001
     ports:
       - "3000:3000"
     depends_on:

@@ -1,20 +1,22 @@
-## Getting Started
-
 This app contains two separate applications.
 
 - Frontend Nextjs (ShadCN UI + FSD)
 - Backend Nestjs (TypeORM + Postgres)
 
+### How to start
+
 1. Make sure you have docker installed
    <https://www.docker.com/products/docker-desktop/>
 
-2. Copy `.env.example` file and fill in the missing environment variables
-
+2. Copy `.env.example` file and fill in the missing environment variables.
 ```sh
 cp .env.example .env
 ```
-
-3. Run all services through docker compose
+3. Update WEB3_NODE variable with your value.
+```
+WEB3_NODE=
+```
+4. Run all services through docker compose
 ```bash
 docker compose up --build
 ```

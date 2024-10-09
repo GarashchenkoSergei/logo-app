@@ -11,45 +11,30 @@ import {
   Input,
   Tabs,
   TabsList,
-  TabsTrigger
+  TabsTrigger,
 } from '@/shared/ui';
+import { postTransaction } from '@/features/transaction/api/transactions';
+import { TransactionTabsProps } from '@/features/transaction/ui/transaction-tabs.type';
 
 // For future growth of coin support
 const supportedCoinList = [ 'ETH' ];
 
-export function TransactionTabs() {
+export function TransactionTabs({ address }: TransactionTabsProps) {
   const [ type, setType ] = useState<TransactionType>(TransactionType.DEPOSIT);
   const [ amount, setAmount ] = useState<string>('');
   const [ coin, setCoin ] = useState<string>(supportedCoinList[0]);
 
-  async function handleTransaction(type: TransactionType, amount: string, coin: string) {
+  async function handleTransaction(
+    type: TransactionType,
+    amount: string,
+    coin: string
+  ) {
     if (!amount || !coin) {
       alert('Please provide both amount and coin.');
       return;
     }
 
-    const BASE_API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-    try {
-      const account = localStorage.getItem('acc');
-      const response = await fetch(`${BASE_API_URL}/transactions/${type}`, {
-        method: 'POST',
-        body: JSON.stringify({ type, amount: parseFloat(amount), coin, account }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      const data = await response.json();
-
-      if (data.account) {
-        alert(`Transaction successful. Updated balance: ${data.account.balance}`);
-      } else {
-        alert('Transaction failed');
-      }
-    } catch (error) {
-      console.error('Transaction error:', error);
-      alert('Error occurred');
-    }
+    await postTransaction(type, address, amount, coin);
   }
 
   return (
@@ -59,12 +44,16 @@ export function TransactionTabs() {
           className="capitalize w-[50%]"
           value={TransactionType.DEPOSIT}
           onClick={() => setType(TransactionType.DEPOSIT)}
-        >{TransactionType.DEPOSIT}</TabsTrigger>
+        >
+          {TransactionType.DEPOSIT}
+        </TabsTrigger>
         <TabsTrigger
           className="capitalize w-[50%]"
           value={TransactionType.WITHDRAW}
           onClick={() => setType(TransactionType.WITHDRAW)}
-        >{TransactionType.WITHDRAW}</TabsTrigger>
+        >
+          {TransactionType.WITHDRAW}
+        </TabsTrigger>
       </TabsList>
 
       <div className="mt-4">
@@ -82,7 +71,9 @@ export function TransactionTabs() {
           </SelectContent>
         </Select>
 
-        <Label htmlFor="amount" className="block mt-4 mb-2">Amount</Label>
+        <Label htmlFor="amount" className="block mt-4 mb-2">
+          Amount
+        </Label>
         <Input
           id="amount"
           type="number"
@@ -97,8 +88,11 @@ export function TransactionTabs() {
           onClick={() => handleTransaction(type, amount, coin)}
           variant="destructive"
           size="lg"
+          disabled={!address}
         >
-          {type === TransactionType.DEPOSIT ? TransactionType.DEPOSIT : TransactionType.WITHDRAW}
+          {type === TransactionType.DEPOSIT
+            ? TransactionType.DEPOSIT
+            : TransactionType.WITHDRAW}
         </Button>
       </div>
     </Tabs>

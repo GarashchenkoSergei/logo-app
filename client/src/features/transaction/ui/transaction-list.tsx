@@ -1,39 +1,31 @@
 import { useEffect, useState } from 'react';
 import { Transaction } from '@/shared/types';
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui';
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/shared/ui';
+import { fetchTransactions } from '@/features/transaction/api/transactions';
+import { TransactionListProps } from '@/features/transaction/ui/transaction-list.type';
 
-export function TransactionList() {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function TransactionList({ address }: TransactionListProps) {
   const [ transactions, setTransactions ] = useState<Transaction[]>([]);
 
   useEffect(() => {
-    const BASE_API_URL = process.env.NEXT_PUBLIC_API_URL;
+    const fetchAndSetTransactions = async () => {
+      const data = await fetchTransactions(address);
 
-    const fetchTransactions = async () => {
-      try {
-        const account = localStorage.getItem('acc');
-        const response = await fetch(`${BASE_API_URL}/transactions?account=${account}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-
-        const data = await response.json();
-
+      if (data) {
         setTransactions(data);
-      } catch (error) {
-        console.error('Transaction error:', error);
-        alert('Error occurred');
       }
     };
 
-    fetchTransactions();
-  }, []);
+    fetchAndSetTransactions();
+  }, [ address ]);
 
   return (
     <Table className="mt-8">

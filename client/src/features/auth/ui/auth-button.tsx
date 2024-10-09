@@ -1,51 +1,20 @@
-// to remove ethereum undefined on window ts error
-
-declare const window: any;
-
-import { useState, useEffect } from 'react';
 import { Button } from '@/shared/ui';
-import { getAccount } from '@/entities/account/lib/utils';
+import { getMetaMaskAcc } from '@/features/auth/api/account';
+import { AuthButtonProps } from '@/features/auth/ui/auth-button.type';
+import { Account } from '@/features/auth/types/account.type';
 
-export function AuthButton() {
-  const [ account, setAccount ] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchAccount = async () => {
-      if (window.ethereum) {
-        try {
-          const account = await getAccount(window.ethereum);
-          if (account) {
-            setAccount(account);
-          }
-        } catch (error) {
-          console.error('Error fetching account:', error);
-        }
-      }
-    };
-
-    fetchAccount();
-  }, []);
-
-  const connectMetaMask = async () => {
-    if (window.ethereum) {
-      try {
-        const accounts = await window.ethereum.request({
-          method: 'eth_requestAccounts',
-        });
-        setAccount(accounts[0]);
-        localStorage.setItem('acc', accounts[0]);
-      } catch (error) {
-        console.error('MetaMask connection error', error);
-      }
-    } else {
-      alert('Please install MetaMask!');
+export function AuthButton({ address, updateFn }: AuthButtonProps) {
+  const handleClick = async () => {
+    const acc: Account | undefined = await getMetaMaskAcc();
+    if (acc) {
+      updateFn(acc);
     }
-  };
+  }
 
   return (
-    <Button onClick={connectMetaMask} className="btn">
-      {account
-        ? `Connected: ${account.slice(0, 6)}...${account.slice(-4)}`
+    <Button onClick={handleClick} className="btn" variant={address ? 'link' : 'default'} disabled={!!address}>
+      {address
+        ? `Connected: ${address.slice(0, 6)}...${address.slice(-4)}`
         : 'Login with MM'}
     </Button>
   );

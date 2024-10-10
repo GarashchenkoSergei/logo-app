@@ -1,5 +1,8 @@
 import { Account } from '@/features/auth/types/account.type';
 import { formatEther } from 'ethers';
+import Web3 from 'web3';
+import { contractABI } from '@/features/transaction/lib/utils';
+import { TransactionType } from '@/shared/types';
 
 interface EthereumWindow extends Window {
   ethereum?: {
@@ -9,26 +12,20 @@ interface EthereumWindow extends Window {
 
 declare const window: EthereumWindow;
 
-const convertWeiToEther = (wei: string): string => {
-  return formatEther(wei);
-};
-
 const isMetaMaskInstalled = (): boolean => {
   return typeof window.ethereum !== 'undefined';
 };
 
-export const fetchAccount = async (): Promise<Account | undefined> => {
-  if (!isMetaMaskInstalled()) {
-    console.error('MetaMask is not installed');
-    return undefined;
-  }
+const convertWeiToEther = (wei: string): string => {
+  return formatEther(wei);
+};
 
+const getAccountAndBalance = async (): Promise<Account | undefined> => {
   try {
     const accounts = await window.ethereum!.request({ method: 'eth_accounts' });
 
     if (accounts && accounts.length > 0) {
       const address = accounts[0];
-
       const balance = await window.ethereum!.request({
         method: 'eth_getBalance',
         params: [ address, 'latest' ],
@@ -48,6 +45,15 @@ export const fetchAccount = async (): Promise<Account | undefined> => {
   }
 };
 
+export const fetchAccount = async (): Promise<Account | undefined> => {
+  if (!isMetaMaskInstalled()) {
+    console.error('MetaMask is not installed');
+    return undefined;
+  }
+
+  return await getAccountAndBalance();
+};
+
 export const getMetaMaskAcc = async (): Promise<Account | undefined> => {
   if (!isMetaMaskInstalled()) {
     alert('Please install MetaMask!');
@@ -61,7 +67,6 @@ export const getMetaMaskAcc = async (): Promise<Account | undefined> => {
 
     if (accounts && accounts.length > 0) {
       const address = accounts[0];
-
       const balance = await window.ethereum!.request({
         method: 'eth_getBalance',
         params: [ address, 'latest' ],
@@ -79,4 +84,36 @@ export const getMetaMaskAcc = async (): Promise<Account | undefined> => {
     console.error('MetaMask connection error:', error);
     return undefined;
   }
+};
+
+const sendEthereumTransaction = async (
+  from: string,
+  amount: string,
+  methodName: TransactionType,
+): Promise<string> => {
+  try {
+    const web3 = new Web3(window.ethereum);
+    const contractAddress = '0x24c5a43a0d5afd8d4a1afd9d262af6b0d43a5fa9';
+    const amountInWei = web3.utils.toWei(amount, 'ether');
+    const contract = new web3.eth.Contract(contractABI, contractAddress);
+
+    const transaction = await contract.methods[methodName](amountInWei).send({
+      from,
+    });
+
+    console.log(`${methodName} transaction`, transaction);
+
+    return transaction.transactionHash.toString();
+  } catch (error) {
+    console.error(`Error during ${methodName} transaction:`, error);
+    throw new Error(`Failed to complete ${methodName} transaction.`);
+  }
+};
+
+export const depositEthereum = async (from: string, amount: string) => {
+  return sendEthereumTransaction(from, amount, TransactionType.DEPOSIT);
+};
+
+export const withdrawEthereum = async (from: string, amount: string) => {
+  return sendEthereumTransaction(from, amount, TransactionType.WITHDRAW);
 };

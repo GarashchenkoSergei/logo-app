@@ -1,5 +1,5 @@
 import { Button } from '@/shared/ui';
-import { getMetaMaskAcc } from '@/features/auth/api/account';
+import { getMetaMaskAcc } from '@/features/transaction/api/ethereum';
 import { AuthButtonProps } from '@/features/auth/ui/auth-button.type';
 import { Account } from '@/features/auth/types/account.type';
 

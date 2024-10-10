@@ -17,10 +17,12 @@ export function TransactionList({ address }: TransactionListProps) {
 
   useEffect(() => {
     const fetchAndSetTransactions = async () => {
-      const data = await fetchTransactions(address);
+      if (address) {
+        const data = await fetchTransactions(address);
 
-      if (data) {
-        setTransactions(data);
+        if (data) {
+          setTransactions(data);
+        }
       }
     };
 

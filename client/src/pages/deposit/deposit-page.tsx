@@ -4,7 +4,7 @@ import { AuthButton } from '@/features/auth';
 import { TransactionList, TransactionTabs } from '@/features/transaction';
 import useAccount from '@/features/auth/hooks/useAccount';
 import { useEffect } from 'react';
-import { fetchAccount } from '@/features/auth/api/account';
+import { fetchAccount } from '@/features/transaction/api/ethereum';
 
 export default function DepositPage() {
   const { account, updateAccount } = useAccount();

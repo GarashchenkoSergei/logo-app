@@ -13,7 +13,7 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/shared/ui';
-import { postTransaction } from '@/features/transaction/api/transactions';
+import { handleTransaction } from '@/features/transaction/api/transactions';
 import { TransactionTabsProps } from '@/features/transaction/ui/transaction-tabs.type';
 
 // For future growth of coin support
@@ -24,17 +24,20 @@ export function TransactionTabs({ address }: TransactionTabsProps) {
   const [ amount, setAmount ] = useState<string>('');
   const [ coin, setCoin ] = useState<string>(supportedCoinList[0]);
 
-  async function handleTransaction(
-    type: TransactionType,
-    amount: string,
-    coin: string
-  ) {
+  async function handleClick() {
     if (!amount || !coin) {
       alert('Please provide both amount and coin.');
       return;
     }
 
-    await postTransaction(type, address, amount, coin);
+    if (parseFloat(amount) <= 0) {
+      alert('Please provide a positive amount.');
+      return;
+    }
+
+    if (address) {
+      await handleTransaction(type, address, amount, coin);
+    }
   }
 
   return (
@@ -85,7 +88,7 @@ export function TransactionTabs({ address }: TransactionTabsProps) {
 
         <Button
           className="btn mt-4 capitalize w-[240px]"
-          onClick={() => handleTransaction(type, amount, coin)}
+          onClick={handleClick}
           variant="destructive"
           size="lg"
           disabled={!address}

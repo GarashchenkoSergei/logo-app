@@ -4,26 +4,16 @@ import { AuthButton } from '@/features/auth';
 import { TransactionList, TransactionTabs } from '@/features/transaction';
 import useAccount from '@/features/auth/hooks/useAccount';
 import { useEffect } from 'react';
-import { fetchAccount } from '@/features/transaction/api/ethereum';
+import { fetchAndSetAccount } from '@/features/auth/api/account';
 
 export default function DepositPage() {
   const { account, updateAccount } = useAccount();
 
   useEffect(() => {
-    const fetchAndUpdateAccount = async () => {
-      try {
-        const fetchedAccount = await fetchAccount();
-
-        if (fetchedAccount) {
-          updateAccount(fetchedAccount);
-        }
-      } catch (error) {
-        alert(`Error fetching account: ${error}`);
-      }
-    };
-
-    fetchAndUpdateAccount();
-  }, [ updateAccount ]);
+    if (!account) {
+      fetchAndSetAccount(updateAccount);
+    }
+  }, [ account, updateAccount ]);
 
   return (
     <>
@@ -36,8 +26,8 @@ export default function DepositPage() {
       <div className="container mx-auto p-4">
         <main className="mt-8">
           {account?.balance !== 'undefined' && <h3 className="text-l mb-4">Balance: {account?.balance}</h3>}
-          <TransactionTabs address={account?.address}/>
-          <TransactionList address={account?.address}/>
+          <TransactionTabs address={account?.address} updateFn={updateAccount}/>
+          <TransactionList account={account} />
         </main>
       </div>
     </>

@@ -1,4 +1,4 @@
-export const retry = async (fn: () => Promise<void>, retries = 3) => {
+export const retry = async (fn: () => Promise<any>, retries = 3) => {
   for (let i = 0; i < retries; i++) {
     try {
       await fn();

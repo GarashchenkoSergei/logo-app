@@ -9,16 +9,16 @@ import {
   TableHeader,
   TableRow,
 } from '@/shared/ui';
-import { fetchTransactions } from '@/features/transaction/api/transactions';
+import { getTransactions } from '@/features/transaction/api/transactions';
 import { TransactionListProps } from '@/features/transaction/ui/transaction-list.type';
 
-export function TransactionList({ address }: TransactionListProps) {
+export function TransactionList({ account }: TransactionListProps) {
   const [ transactions, setTransactions ] = useState<Transaction[]>([]);
 
   useEffect(() => {
     const fetchAndSetTransactions = async () => {
-      if (address) {
-        const data = await fetchTransactions(address);
+      if (account) {
+        const data = await getTransactions(account.address);
 
         if (data) {
           setTransactions(data);
@@ -27,7 +27,7 @@ export function TransactionList({ address }: TransactionListProps) {
     };
 
     fetchAndSetTransactions();
-  }, [ address ]);
+  }, [ account ]);
 
   return (
     <Table className="mt-8">

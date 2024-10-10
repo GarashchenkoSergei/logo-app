@@ -9,8 +9,8 @@ export class Account {
   @Column({ unique: true })
   externalAddress: string;
 
-  @Column({ type: 'decimal', precision: 18, scale: 8 })
-  balance: number;
+  @Column()
+  balance: string;
 
   @OneToMany(() => Transaction, (transaction) => transaction.account)
   transactions: Transaction[];

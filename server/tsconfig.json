@@ -21,6 +21,7 @@
       "@/*": ["src/*"],
       "@auth/*": ["src/auth/*"],
       "@transactions/*": ["src/transactions/*"],
+      "@ether/*": ["src/ether/*"]
     }
   }
 }

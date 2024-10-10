@@ -5,6 +5,7 @@ import {
 } from '@/features/transaction/api/ethereum';
 import { handleTransactionError, retry } from '@/features/transaction/lib/utils';
 import { apiRequest } from '@/shared/lib/utils';
+import { Account } from '@/features/auth/types/account.type';
 
 const BASE_API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -28,17 +29,15 @@ export const handleTransaction = async (
 
     if (type === TransactionType.DEPOSIT) {
       hash = await depositEthereum(address, amount);
-      console.log('Deposit transaction hash:', hash);
     }
 
     if (type === TransactionType.WITHDRAW) {
       hash = await withdrawEthereum(address, amount);
-      console.log('Withdraw transaction hash:', hash);
     }
 
     if (hash) {
       try {
-        await postTransaction(type, address, amount, coin, hash);
+        return await postTransaction(type, address, amount, coin, hash);
       } catch (error) {
         console.error('Error saving transaction to server:', error);
         await retryPostTransaction(type, address, amount, coin, hash);
@@ -55,7 +54,7 @@ export const postTransaction = async (
   amount: string,
   coin: string,
   hash: string,
-): Promise<void> => {
+): Promise<Account | undefined> => {
   const requestBody = { type, amount, coin, address, hash };
 
   try {
@@ -65,8 +64,13 @@ export const postTransaction = async (
       body: JSON.stringify(requestBody),
     });
 
-    if (data?.account) {
-      alert(`Transaction '${type}' successful. Updated balance: ${data.account.balance}`);
+    if (data) {
+      alert(`Transaction '${type}' successful. Updated balance: ${data.balance}`);
+
+      return {
+        address: data.externalAddress,
+        balance: data.balance,
+      };
     }
   } catch (error) {
     console.error('Error posting transaction:', error);
@@ -74,7 +78,7 @@ export const postTransaction = async (
   }
 };
 
-export const fetchTransactions = async (
+export const getTransactions = async (
   address: string,
 ): Promise<Transaction[] | undefined> => {
   try {

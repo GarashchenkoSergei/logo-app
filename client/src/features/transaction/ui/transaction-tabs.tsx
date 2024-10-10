@@ -19,10 +19,11 @@ import { TransactionTabsProps } from '@/features/transaction/ui/transaction-tabs
 // For future growth of coin support
 const supportedCoinList = [ 'ETH' ];
 
-export function TransactionTabs({ address }: TransactionTabsProps) {
+export function TransactionTabs({ address, updateFn }: TransactionTabsProps) {
   const [ type, setType ] = useState<TransactionType>(TransactionType.DEPOSIT);
   const [ amount, setAmount ] = useState<string>('');
   const [ coin, setCoin ] = useState<string>(supportedCoinList[0]);
+  const [ isLoading, setIsLoading ] = useState<boolean>(false);
 
   async function handleClick() {
     if (!amount || !coin) {
@@ -36,7 +37,13 @@ export function TransactionTabs({ address }: TransactionTabsProps) {
     }
 
     if (address) {
-      await handleTransaction(type, address, amount, coin);
+      setIsLoading(true);
+      const account = await handleTransaction(type, address, amount, coin);
+
+      if (account) {
+        updateFn(account);
+      }
+      setIsLoading(false);
     }
   }
 
@@ -91,11 +98,15 @@ export function TransactionTabs({ address }: TransactionTabsProps) {
           onClick={handleClick}
           variant="destructive"
           size="lg"
-          disabled={!address}
+          disabled={!address  || isLoading}
         >
-          {type === TransactionType.DEPOSIT
-            ? TransactionType.DEPOSIT
-            : TransactionType.WITHDRAW}
+          {isLoading ? (
+            <span>In progress</span>
+          ) : (
+            type === TransactionType.DEPOSIT
+              ? TransactionType.DEPOSIT
+              : TransactionType.WITHDRAW
+          )}
         </Button>
       </div>
     </Tabs>

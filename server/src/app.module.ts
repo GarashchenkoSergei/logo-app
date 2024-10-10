@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Account } from '@transactions/entities/account.entity';
-import { AuthModule } from '@auth/auth.module';
+import { Account } from '@/account/entities/account.entity';
 import { Transaction } from '@transactions/entities/transaction.entity';
 import { TransactionsModule } from '@transactions/transactions.module';
 import { ConfigModule } from '@nestjs/config';
+import { AccountModule } from './account/account.module';
 
 @Module({
   imports: [
@@ -24,7 +24,7 @@ import { ConfigModule } from '@nestjs/config';
     }),
     TypeOrmModule.forFeature([Account, Transaction]),
     TransactionsModule,
-    AuthModule,
+    AccountModule,
   ],
 })
 export class AppModule {}

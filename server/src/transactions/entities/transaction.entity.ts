@@ -5,7 +5,7 @@ import {
   ManyToOne,
   CreateDateColumn,
 } from 'typeorm';
-import { Account } from '@transactions/entities/account.entity';
+import { Account } from '@/account/entities/account.entity';
 import { TransactionType } from '@transactions/enums/transaction-type.enum';
 
 @Entity()
@@ -19,13 +19,13 @@ export class Transaction {
   @Column()
   coin: string;
 
-  @Column({ type: 'decimal', precision: 18, scale: 8 })
-  amount: number;
+  @Column()
+  amount: string;
 
   @Column({ unique: true })
   hash: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   date: Date;
 
   @ManyToOne(() => Account, (account) => account.transactions)

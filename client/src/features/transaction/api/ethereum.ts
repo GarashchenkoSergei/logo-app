@@ -1,5 +1,3 @@
-import { Account } from '@/features/auth/types/account.type';
-import { formatEther } from 'ethers';
 import Web3 from 'web3';
 import { contractABI } from '@/features/transaction/lib/utils';
 import { TransactionType } from '@/shared/types';
@@ -12,29 +10,12 @@ interface EthereumWindow extends Window {
 
 declare const window: EthereumWindow;
 
-const isMetaMaskInstalled = (): boolean => {
-  return typeof window.ethereum !== 'undefined';
-};
-
-const convertWeiToEther = (wei: string): string => {
-  return formatEther(wei);
-};
-
-const getAccountAndBalance = async (): Promise<Account | undefined> => {
+const getAccount = async (): Promise<string | undefined> => {
   try {
     const accounts = await window.ethereum!.request({ method: 'eth_accounts' });
 
     if (accounts && accounts.length > 0) {
-      const address = accounts[0];
-      const balance = await window.ethereum!.request({
-        method: 'eth_getBalance',
-        params: [ address, 'latest' ],
-      });
-
-      return {
-        address,
-        balance: convertWeiToEther(balance),
-      };
+      return accounts[0];
     }
 
     console.warn('No accounts found');
@@ -45,37 +26,14 @@ const getAccountAndBalance = async (): Promise<Account | undefined> => {
   }
 };
 
-export const fetchAccount = async (): Promise<Account | undefined> => {
-  if (!isMetaMaskInstalled()) {
-    console.error('MetaMask is not installed');
-    return undefined;
-  }
-
-  return await getAccountAndBalance();
-};
-
-export const getMetaMaskAcc = async (): Promise<Account | undefined> => {
-  if (!isMetaMaskInstalled()) {
-    alert('Please install MetaMask!');
-    return undefined;
-  }
-
+const getMetaMaskAcc = async (): Promise<string | undefined> => {
   try {
     const accounts = await window.ethereum!.request({
       method: 'eth_requestAccounts',
     });
 
     if (accounts && accounts.length > 0) {
-      const address = accounts[0];
-      const balance = await window.ethereum!.request({
-        method: 'eth_getBalance',
-        params: [ address, 'latest' ],
-      });
-
-      return {
-        address,
-        balance: convertWeiToEther(balance),
-      };
+      return accounts[0];
     }
 
     console.warn('No accounts found');
@@ -84,6 +42,21 @@ export const getMetaMaskAcc = async (): Promise<Account | undefined> => {
     console.error('MetaMask connection error:', error);
     return undefined;
   }
+};
+
+export const fetchOrRequestMetaMaskAccount = async (): Promise<string | undefined> => {
+  if (typeof window.ethereum === 'undefined') {
+    console.error('MetaMask is not installed');
+    return undefined;
+  }
+
+  let account = await getAccount();
+
+  if (!account) {
+    account = await getMetaMaskAcc();
+  }
+
+  return account;
 };
 
 const sendEthereumTransaction = async (

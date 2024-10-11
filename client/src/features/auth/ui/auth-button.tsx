@@ -4,7 +4,7 @@ import { fetchAndSetAccount } from '@/features/auth/api/account';
 
 export function AuthButton({ address, updateFn }: AuthButtonProps) {
   const handleClick = async () => {
-    await fetchAndSetAccount(updateFn);
+    await fetchAndSetAccount(updateFn, true);
   };
 
   return (

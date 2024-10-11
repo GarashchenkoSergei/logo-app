@@ -10,7 +10,12 @@ interface EthereumWindow extends Window {
 
 declare const window: EthereumWindow;
 
-const getAccount = async (): Promise<string | undefined> => {
+export const getCurrentMetaMaskAcc = async (): Promise<string | undefined> => {
+  if (typeof window.ethereum === 'undefined') {
+    console.error('MetaMask is not installed');
+    return undefined;
+  }
+
   try {
     const accounts = await window.ethereum!.request({ method: 'eth_accounts' });
 
@@ -26,7 +31,12 @@ const getAccount = async (): Promise<string | undefined> => {
   }
 };
 
-const getMetaMaskAcc = async (): Promise<string | undefined> => {
+export const requestMetaMaskAcc = async (): Promise<string | undefined> => {
+  if (typeof window.ethereum === 'undefined') {
+    console.error('MetaMask is not installed');
+    return undefined;
+  }
+
   try {
     const accounts = await window.ethereum!.request({
       method: 'eth_requestAccounts',
@@ -42,21 +52,6 @@ const getMetaMaskAcc = async (): Promise<string | undefined> => {
     console.error('MetaMask connection error:', error);
     return undefined;
   }
-};
-
-export const fetchOrRequestMetaMaskAccount = async (): Promise<string | undefined> => {
-  if (typeof window.ethereum === 'undefined') {
-    console.error('MetaMask is not installed');
-    return undefined;
-  }
-
-  let account = await getAccount();
-
-  if (!account) {
-    account = await getMetaMaskAcc();
-  }
-
-  return account;
 };
 
 const sendEthereumTransaction = async (

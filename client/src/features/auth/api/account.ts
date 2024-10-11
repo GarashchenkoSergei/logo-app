@@ -1,17 +1,20 @@
 import { apiRequest } from '@/shared/lib/utils';
 import { Account } from '@/features/auth/types/account.type';
-import { fetchOrRequestMetaMaskAccount } from '@/features/transaction/api/ethereum';
+import { getCurrentMetaMaskAcc, requestMetaMaskAcc } from '@/features/transaction/api/ethereum';
 
 const BASE_API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export const fetchAndSetAccount = async (
-  updateFn: (account: Account) => void
+  updateFn: (account: Account) => void,
+  isClicked: boolean = false
 ): Promise<void> => {
   try {
-    const fetchedAccount = await fetchOrRequestMetaMaskAccount();
+    const fetchedAccount = isClicked
+      ? await requestMetaMaskAcc()
+      : await getCurrentMetaMaskAcc();
 
     if (fetchedAccount) {
-      const accountData = await getAccountData(fetchedAccount);
+      const accountData = await getAccountApiData(fetchedAccount);
 
       const updatedAccount = accountData
         ? accountData
@@ -23,7 +26,7 @@ export const fetchAndSetAccount = async (
   }
 };
 
-export const getAccountData = async (
+export const getAccountApiData = async (
   address: string,
 ): Promise<Account | undefined> => {
   try {

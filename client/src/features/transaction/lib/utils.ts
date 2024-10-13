@@ -21,7 +21,7 @@ export const handleTransactionError = (error: unknown) => {
     } else if (error.message.includes('unknown account')) {
       alert('Account not recognized or unlocked.');
     } else {
-      alert('Transaction failed. Please try again.');
+      alert(error.message);
     }
   } else {
     console.error('Unknown error occurred during transaction.');
@@ -119,3 +119,17 @@ export const contractABI = [
   },
 ];
 
+interface ProviderRpcError extends Error {
+  message: string;
+  code: number;
+  data?: unknown;
+}
+
+export function isProviderRpcError(error: unknown): error is ProviderRpcError {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    'code' in error
+  );
+}

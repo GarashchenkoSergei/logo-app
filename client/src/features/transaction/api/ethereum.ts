@@ -1,6 +1,5 @@
 import Web3 from 'web3';
-import { contractABI } from '@/features/transaction/lib/utils';
-import { TransactionType } from '@/shared/types';
+import { contractABI, isProviderRpcError } from '@/features/transaction/lib/utils';
 
 interface EthereumWindow extends Window {
   ethereum?: {
@@ -54,34 +53,50 @@ export const requestMetaMaskAcc = async (): Promise<string | undefined> => {
   }
 };
 
-const sendEthereumTransaction = async (
-  from: string,
-  amount: string,
-  methodName: TransactionType,
-): Promise<string> => {
+export const depositEthereum = async (from: string, amount: string): Promise<string> => {
   try {
     const web3 = new Web3(window.ethereum);
     const contractAddress = '0x24c5a43a0d5afd8d4a1afd9d262af6b0d43a5fa9';
     const amountInWei = web3.utils.toWei(amount, 'ether');
     const contract = new web3.eth.Contract(contractABI, contractAddress);
 
-    const transaction = await contract.methods[methodName](amountInWei).send({
+    const transaction = await contract.methods.deposit().send({
+      from,
+      value: amountInWei,
+    });
+
+    console.log('Deposit transaction', transaction);
+
+    return transaction.transactionHash.toString();
+  } catch (error: unknown) {
+    if (isProviderRpcError(error) && error.message.includes('User denied')) {
+      throw new Error(error.message);
+    }
+
+    console.error('Error during deposit transaction:', error);
+    throw new Error('Failed to complete deposit transaction.');
+  }
+}
+
+export const withdrawEthereum = async (from: string, amount: string): Promise<string> => {
+  try {
+    // TODO: Implement. Possibly refactor ethereum.ts to Class.
+    const contractAddress = '0x24c5a43a0d5afd8d4a1afd9d262af6b0d43a5fa9';
+    const web3 = new Web3(window.ethereum);
+    const contract = new web3.eth.Contract(contractABI, contractAddress);
+    const transaction = await contract.methods.withdraw(amount).send({
       from,
     });
 
-    console.log(`${methodName} transaction`, transaction);
+    console.log('Withdraw transaction', transaction);
 
     return transaction.transactionHash.toString();
-  } catch (error) {
-    console.error(`Error during ${methodName} transaction:`, error);
-    throw new Error(`Failed to complete ${methodName} transaction.`);
+  } catch (error: unknown) {
+    if (isProviderRpcError(error) && error.message.includes('User denied')) {
+      throw new Error(error.message);
+    }
+
+    console.error('Error during withdraw transaction:', error);
+    throw new Error('Failed to complete withdraw transaction.');
   }
-};
-
-export const depositEthereum = async (from: string, amount: string) => {
-  return sendEthereumTransaction(from, amount, TransactionType.DEPOSIT);
-};
-
-export const withdrawEthereum = async (from: string, amount: string) => {
-  return sendEthereumTransaction(from, amount, TransactionType.WITHDRAW);
-};
+}

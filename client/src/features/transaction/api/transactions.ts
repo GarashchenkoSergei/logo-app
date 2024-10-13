@@ -87,7 +87,7 @@ export const getTransactions = async (
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    alert(`Error occurred wile fetching transactions list: ${error}`);
+    console.log(`Error occurred wile fetching transactions list: ${error}`);
     return undefined;
   }
 };

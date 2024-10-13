@@ -1,6 +1,6 @@
 This app contains two separate applications.
 
-- Frontend Nextjs (ShadCN UI + FSD)
+- Frontend Nextjs (ShadCN UI + FSD) + Web3
 - Backend Nestjs (TypeORM + Postgres)
 
 ### How to start
